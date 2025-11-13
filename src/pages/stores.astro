@@ -1,0 +1,140 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getStoreStats, getProductStats } from "../lib/sales";
+import StoreSalesChart from "../components/StoreSalesChart";
+
+const storeStats = getStoreStats();
+const globalStats = getProductStats();
+---
+
+<BaseLayout
+  title="Análisis por Sucursales | Sales Insights"
+  description="Análisis detallado del rendimiento por sucursal"
+>
+  <section class="space-y-6 md:space-y-8 mb-6 md:mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <h2 class="text-lg md:text-xl font-semibold text-slate-100">Rendimiento por Sucursal</h2>
+      <div class="text-xs md:text-sm">
+        <span class="px-2 md:px-3 py-1 bg-slate-800 rounded text-slate-300 border border-slate-700">
+          {storeStats.length} sucursales activas
+        </span>
+      </div>
+    </div>
+
+    <div class="grid gap-3 md:gap-6 grid-cols-2 lg:grid-cols-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+        <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Ingresos totales</p>
+        <p class="text-lg md:text-2xl font-bold text-emerald-400">
+          ${globalStats.totalRevenue.toLocaleString()}
+        </p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+        <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Tickets totales</p>
+        <p class="text-lg md:text-2xl font-bold text-slate-100">
+          {globalStats.totalTickets.toLocaleString()}
+        </p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+        <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Ticket prom.</p>
+        <p class="text-lg md:text-2xl font-bold text-slate-100">
+          ${(globalStats.totalRevenue / globalStats.totalTickets).toFixed(2)}
+        </p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+        <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Margen prom.</p>
+        <p class="text-lg md:text-2xl font-bold text-amber-400">
+          {(globalStats.avgMargin * 100).toFixed(1)}%
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="space-y-6 md:space-y-8">
+    <div>
+      <h3 class="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-slate-100">Ingresos por Sucursal</h3>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+        <StoreSalesChart client:load data={storeStats} />
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-slate-100">Detalle por Sucursal</h3>
+      <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-lg">
+        <table class="min-w-full text-xs md:text-sm">
+          <thead class="bg-slate-800 border-b border-slate-700">
+            <tr>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-left font-semibold text-slate-300">
+                <span class="hidden sm:inline">SUCURSAL</span>
+                <span class="sm:hidden">SUC.</span>
+              </th>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-right font-semibold text-slate-300 hidden lg:table-cell">
+                PRODUCTOS
+              </th>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-right font-semibold text-slate-300">
+                <span class="hidden md:inline">VENTAS TOTALES</span>
+                <span class="md:hidden">VENTAS</span>
+              </th>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-right font-semibold text-slate-300 hidden sm:table-cell">
+                <span class="hidden lg:inline">TICKETS</span>
+                <span class="lg:hidden">TICK.</span>
+              </th>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-right font-semibold text-slate-300">
+                <span class="hidden sm:inline">INGRESOS</span>
+                <span class="sm:hidden">INGR.</span>
+              </th>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-right font-semibold text-slate-300 hidden md:table-cell">
+                <span class="hidden lg:inline">TICKET PROMEDIO</span>
+                <span class="lg:hidden">TICK. PROM.</span>
+              </th>
+              <th class="px-2 md:px-6 py-2 md:py-4 text-right font-semibold text-slate-300">
+                <span class="hidden md:inline">MARGEN PROMEDIO</span>
+                <span class="md:hidden">MARG.</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {storeStats.map((store) => (
+              <tr key={store.store} class="border-t border-slate-700 hover:bg-slate-800 transition-colors">
+                <td class="px-2 md:px-6 py-2 md:py-4 text-emerald-400 font-semibold">
+                  <div class="truncate max-w-[100px] md:max-w-none" title={store.store}>
+                    {store.store}
+                  </div>
+                </td>
+                <td class="px-2 md:px-6 py-2 md:py-4 text-right text-slate-200 font-medium hidden lg:table-cell">
+                  <span class="text-xs md:text-sm">
+                    {store.productCount}
+                  </span>
+                </td>
+                <td class="px-2 md:px-6 py-2 md:py-4 text-right text-slate-200 font-medium">
+                  <span class="text-xs md:text-sm">
+                    {store.totalSales.toLocaleString()}
+                  </span>
+                </td>
+                <td class="px-2 md:px-6 py-2 md:py-4 text-right text-slate-200 font-medium hidden sm:table-cell">
+                  <span class="text-xs md:text-sm">
+                    {store.totalTickets.toLocaleString()}
+                  </span>
+                </td>
+                <td class="px-2 md:px-6 py-2 md:py-4 text-right text-emerald-400 font-bold">
+                  <span class="text-xs md:text-sm">
+                    ${store.totalRevenue.toLocaleString()}
+                  </span>
+                </td>
+                <td class="px-2 md:px-6 py-2 md:py-4 text-right text-slate-200 font-medium hidden md:table-cell">
+                  <span class="text-xs md:text-sm">
+                    ${store.avgTicket.toFixed(2)}
+                  </span>
+                </td>
+                <td class="px-2 md:px-6 py-2 md:py-4 text-right text-amber-400 font-bold">
+                  <span class="text-xs md:text-sm">
+                    {(store.avgMargin * 100).toFixed(1)}%
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

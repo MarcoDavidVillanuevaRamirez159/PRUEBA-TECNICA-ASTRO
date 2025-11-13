@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "coca-cola-600ml",
+    "name": "Coca Cola 600ml",
+    "category": "Bebidas",
+    "store": "Sucursal Centro",
+    "totalSales": 320,
+    "tickets": 180,
+    "revenue": 4800,
+    "margin": 0.28
+  },
+  {
+    "slug": "pan-blanco",
+    "name": "Pan blanco",
+    "category": "Panadería",
+    "store": "Sucursal Norte",
+    "totalSales": 220,
+    "tickets": 140,
+    "revenue": 2200,
+    "margin": 0.22
+  },
+  {
+    "slug": "sabritas-queso",
+    "name": "Sabritas Queso",
+    "category": "Botanas",
+    "store": "Sucursal Centro",
+    "totalSales": 410,
+    "tickets": 230,
+    "revenue": 4100,
+    "margin": 0.3
+  },
+  {
+    "slug": "leche-1l",
+    "name": "Leche 1L",
+    "category": "Lácteos",
+    "store": "Sucursal Sur",
+    "totalSales": 290,
+    "tickets": 170,
+    "revenue": 2900,
+    "margin": 0.18
+  },
+  {
+    "slug": "huevo-docena",
+    "name": "Huevo (docena)",
+    "category": "Abarrotes",
+    "store": "Sucursal Centro",
+    "totalSales": 340,
+    "tickets": 200,
+    "revenue": 3400,
+    "margin": 0.25
+  },
+  {
+    "slug": "galletas-maria",
+    "name": "Galletas María",
+    "category": "Galletas",
+    "store": "Sucursal Norte",
+    "totalSales": 180,
+    "tickets": 120,
+    "revenue": 1800,
+    "margin": 0.27
+  }
+]

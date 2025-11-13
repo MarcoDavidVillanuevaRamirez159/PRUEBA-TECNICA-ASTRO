@@ -1,0 +1,120 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSaleBySlug, getAllSales } from "../../lib/sales";
+
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const sales = getAllSales();
+  return sales.map(sale => ({
+    params: { slug: sale.slug }
+  }));
+}
+
+const { slug } = Astro.params;
+const product = getSaleBySlug(slug!);
+
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+// Calcular métricas adicionales
+const pricePerUnit = product.revenue / product.totalSales;
+const averageTicket = product.revenue / product.tickets;
+const unitsPerTicket = product.totalSales / product.tickets;
+---
+
+<BaseLayout
+  title={`${product.name} | Sales Insights`}
+  description={`Análisis detallado y simulador de precios para ${product.name}`}
+>
+  <section class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-semibold">{product.name}</h2>
+        <p class="text-slate-400 mt-1">
+          {product.category} • {product.store}
+        </p>
+      </div>
+      <a
+        href="/"
+        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm transition-colors"
+      >
+        ← Volver a productos
+      </a>
+    </div>
+
+    <!-- Métricas actuales -->
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs text-slate-400 mb-1">Ventas totales</p>
+        <p class="text-2xl font-semibold text-slate-100">
+          {product.totalSales.toLocaleString()}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">unidades</p>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs text-slate-400 mb-1">Ingresos totales</p>
+        <p class="text-2xl font-semibold text-emerald-400">
+          ${product.revenue.toLocaleString()}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">en el periodo</p>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs text-slate-400 mb-1">Tickets</p>
+        <p class="text-2xl font-semibold text-blue-400">
+          {product.tickets.toLocaleString()}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">transacciones</p>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs text-slate-400 mb-1">Margen</p>
+        <p class="text-2xl font-semibold text-amber-400">
+          {(product.margin * 100).toFixed(1)}%
+        </p>
+        <p class="text-xs text-slate-500 mt-1">de ganancia</p>
+      </div>
+    </div>
+
+    <!-- Métricas derivadas -->
+    <div class="rounded-xl border border-slate-800 bg-slate-900/30 p-6">
+      <h3 class="text-lg font-semibold mb-4">Análisis Detallado</h3>
+      <div class="grid gap-6 sm:grid-cols-3">
+        <div>
+          <p class="text-sm text-slate-400 mb-2">Precio promedio por unidad</p>
+          <p class="text-lg font-medium text-slate-100">
+            ${pricePerUnit.toFixed(2)}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-400 mb-2">Ticket promedio</p>
+          <p class="text-lg font-medium text-slate-100">
+            ${averageTicket.toFixed(2)}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-400 mb-2">Unidades por ticket</p>
+          <p class="text-lg font-medium text-slate-100">
+            {unitsPerTicket.toFixed(1)}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulador What-if -->
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+      <h3 class="text-lg font-semibold mb-4">Simulador de Precios</h3>
+      <p class="text-sm text-slate-400 mb-6">
+        Simula el impacto de cambios de precio en las ventas y ingresos del producto
+      </p>
+
+    </div>
+  </section>
+</BaseLayout>

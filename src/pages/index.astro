@@ -1,16 +1,65 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SalesList from "../components/SalesList";
+import ProductRevenueChart from "../components/ProductRevenueChart";
+import { getAllSales, getProductStats } from "../lib/sales";
 
+const items = getAllSales();
+const stats = getProductStats();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+        title="Sales Insights | Dashboard"
+        description="Dashboard de analítica básica de ventas para un punto de venta."
+>
+    <section class="space-y-4 mb-8">
+        <h2 class="text-lg font-semibold">Resumen de Productos</h2>
+        <div class="grid gap-3 md:gap-6 grid-cols-2 lg:grid-cols-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+                <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Ingresos totales</p>
+                <p class="text-lg md:text-2xl font-bold text-blue-400">
+                    ${stats.totalRevenue.toLocaleString()}
+                </p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+                <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Tickets totales</p>
+                <p class="text-lg md:text-2xl font-bold text-slate-100">
+                    {stats.totalTickets.toLocaleString()}
+                </p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+                <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Productos</p>
+                <p class="text-lg md:text-2xl font-bold text-slate-100">
+                    {stats.totalProducts}
+                </p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+                <p class="text-xs md:text-sm text-slate-400 mb-1 md:mb-2">Margen prom.</p>
+                <p class="text-lg md:text-2xl font-bold text-emerald-400">
+                    {(stats.avgMargin * 100).toFixed(1)}%
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="space-y-6 md:space-y-10">
+        <div>
+            <h2 class="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-slate-100">Ingresos por Producto</h2>
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 md:p-6">
+                <ProductRevenueChart client:load data={items} />
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-lg md:text-xl font-semibold text-slate-100 mb-2">Detalle por producto</h2>
+            <p class="text-sm md:text-base text-slate-400 mb-4 md:mb-6">
+                Utiliza la búsqueda y los filtros para explorar el rendimiento de cada producto
+            </p>
+
+            <SalesList client:load items={items} />
+        </div>
+    </section>
+</BaseLayout>

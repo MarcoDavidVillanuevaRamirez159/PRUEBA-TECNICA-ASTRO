@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getAllSales } from "../lib/sales";
+
+const allSales = getAllSales();
+const randomProducts = allSales.sort(() => Math.random() - 0.5).slice(0, 3);
+---
+
+<BaseLayout
+  title="Página no encontrada | Sales Insights"
+  description="La página que buscas no existe"
+>
+  <section class="text-center space-y-10">
+    <div class="space-y-6">
+      <h1 class="text-8xl font-bold text-slate-600">404</h1>
+      <h2 class="text-3xl font-bold text-slate-100">
+        Página no encontrada
+      </h2>
+      <p class="text-lg text-slate-400 max-w-lg mx-auto leading-relaxed">
+        La página que buscas no existe o ha sido movida. Te sugerimos explorar estos productos destacados:
+      </p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-3 max-w-2xl mx-auto">
+      {randomProducts.map((product) => (
+        <a
+          href={`/item/${product.slug}`}
+          class="block p-4 border border-slate-700 rounded-lg hover:border-emerald-500 hover:bg-slate-900/50 transition-all group"
+        >
+          <h3 class="font-medium text-emerald-400 group-hover:text-emerald-300 mb-2">
+            {product.name}
+          </h3>
+          <div class="text-sm text-slate-400 space-y-1">
+            <p>{product.category}</p>
+            <p class="font-medium">${product.revenue.toLocaleString()}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="/"
+        class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+      >
+        Ver todos los productos
+      </a>
+      <a
+        href="/stores"
+        class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg font-medium transition-colors border border-slate-700"
+      >
+        Análisis de sucursales
+      </a>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,222 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSalesBySlugs } from "../lib/sales";
+import CompareChart from "../components/CompareChart";
+
+const url = Astro.url;
+const itemsParam = url.searchParams.get('items');
+
+if (!itemsParam) {
+  return Astro.redirect('/');
+}
+
+const slugs = itemsParam.split(',').filter(Boolean);
+
+if (slugs.length < 2 || slugs.length > 3) {
+  return Astro.redirect('/');
+}
+
+const items = getSalesBySlugs(slugs);
+
+if (items.length !== slugs.length) {
+  return Astro.redirect('/');
+}
+---
+
+<BaseLayout
+  title={`Comparador de Productos | Sales Insights`}
+  description={`Comparación detallada entre ${items.length} productos seleccionados`}
+>
+  <section class="space-y-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
+      <div class="flex-1">
+        <h2 class="text-xl md:text-2xl font-bold text-emerald-400">
+          Comparador de Productos
+        </h2>
+        <p class="text-sm md:text-base text-slate-400 mt-1">
+          Análisis comparativo de {items.length} productos seleccionados
+        </p>
+        <div class="flex flex-wrap gap-2 mt-3">
+          {items.map((item) => (
+            <span key={item.slug} class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-300">
+              <span class="hidden sm:inline">{item.name}</span>
+              <span class="sm:hidden" title={item.name}>{item.name.substring(0, 10)}...</span>
+            </span>
+          ))}
+        </div>
+      </div>
+      <a
+        href="/"
+        class="self-start px-3 md:px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs md:text-sm transition-colors"
+      >
+        <span class="hidden sm:inline">← Volver a productos</span>
+        <span class="sm:hidden">← Volver</span>
+      </a>
+    </div>
+
+    <!-- Resumen ejecutivo -->
+    <div class="rounded-xl border border-slate-700 bg-slate-900 p-4 md:p-6">
+      <h3 class="text-lg md:text-xl font-semibold text-emerald-400 mb-4 md:mb-6">Resumen Ejecutivo</h3>
+      <div class="grid gap-4 md:gap-6 sm:grid-cols-1 lg:grid-cols-3">
+        <div class="bg-slate-800 rounded-lg p-3 md:p-4">
+          <p class="text-xs md:text-sm text-slate-400 mb-2">Mejor performer (Ingresos)</p>
+          <p class="font-medium text-emerald-400 text-sm md:text-base truncate" title={items.sort((a, b) => b.revenue - a.revenue)[0].name}>
+            {items.sort((a, b) => b.revenue - a.revenue)[0].name}
+          </p>
+          <p class="text-xs md:text-sm text-slate-500 mt-1">
+            ${items.sort((a, b) => b.revenue - a.revenue)[0].revenue.toLocaleString()}
+          </p>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-3 md:p-4">
+          <p class="text-xs md:text-sm text-slate-400 mb-2">Mayor margen</p>
+          <p class="font-medium text-amber-400 text-sm md:text-base truncate" title={items.sort((a, b) => b.margin - a.margin)[0].name}>
+            {items.sort((a, b) => b.margin - a.margin)[0].name}
+          </p>
+          <p class="text-xs md:text-sm text-slate-500 mt-1">
+            {(items.sort((a, b) => b.margin - a.margin)[0].margin * 100).toFixed(1)}%
+          </p>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-3 md:p-4">
+          <p class="text-xs md:text-sm text-slate-400 mb-2">Más vendido (unidades)</p>
+          <p class="font-medium text-blue-400 text-sm md:text-base truncate" title={items.sort((a, b) => b.totalSales - a.totalSales)[0].name}>
+            {items.sort((a, b) => b.totalSales - a.totalSales)[0].name}
+          </p>
+          <p class="text-xs md:text-sm text-slate-500 mt-1">
+            {items.sort((a, b) => b.totalSales - a.totalSales)[0].totalSales.toLocaleString()} unidades
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfica comparativa -->
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+      <h3 class="text-lg font-medium mb-4">Comparación de Ingresos</h3>
+      <CompareChart client:load items={items} />
+    </div>
+
+    <!-- Tabla comparativa -->
+    <div class="rounded-xl border border-slate-800 bg-slate-900/60 overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-900 border-b border-slate-800">
+          <tr>
+            <th class="px-4 py-3 text-left font-medium text-slate-300">
+              Métrica
+            </th>
+            {items.map((item) => (
+              <th key={item.slug} class="px-4 py-3 text-center font-medium text-slate-300">
+                {item.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-t border-slate-800">
+            <td class="px-4 py-3 text-slate-400 font-medium">Categoría</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-slate-200">
+                {item.category}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800 bg-slate-900/30">
+            <td class="px-4 py-3 text-slate-400 font-medium">Sucursal</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-slate-200">
+                {item.store}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800">
+            <td class="px-4 py-3 text-slate-400 font-medium">Ventas Totales</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-slate-200 font-medium">
+                {item.totalSales.toLocaleString()}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800 bg-slate-900/30">
+            <td class="px-4 py-3 text-slate-400 font-medium">Tickets</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-slate-200">
+                {item.tickets.toLocaleString()}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800">
+            <td class="px-4 py-3 text-slate-400 font-medium">Ingresos</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-emerald-400 font-bold">
+                ${item.revenue.toLocaleString()}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800 bg-slate-900/30">
+            <td class="px-4 py-3 text-slate-400 font-medium">Margen</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-amber-400 font-medium">
+                {(item.margin * 100).toFixed(1)}%
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800">
+            <td class="px-4 py-3 text-slate-400 font-medium">Precio Promedio por Unidad</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-slate-200">
+                ${(item.revenue / item.totalSales).toFixed(2)}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800 bg-slate-900/30">
+            <td class="px-4 py-3 text-slate-400 font-medium">Ticket Promedio</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-blue-400">
+                ${(item.revenue / item.tickets).toFixed(2)}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800">
+            <td class="px-4 py-3 text-slate-400 font-medium">Unidades por Ticket</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-slate-200">
+                {(item.totalSales / item.tickets).toFixed(1)}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800 bg-slate-900/30">
+            <td class="px-4 py-3 text-slate-400 font-medium">Ganancia por Unidad</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-green-400 font-medium">
+                ${((item.revenue / item.totalSales) * item.margin).toFixed(2)}
+              </td>
+            ))}
+          </tr>
+          <tr class="border-t border-slate-800">
+            <td class="px-4 py-3 text-slate-400 font-medium">ROI Estimado</td>
+            {items.map((item) => (
+              <td key={item.slug} class="px-4 py-3 text-center text-purple-400 font-medium">
+                {((item.margin / (1 - item.margin)) * 100).toFixed(0)}%
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Enlaces individuales -->
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => (
+        <a
+          key={item.slug}
+          href={`/item/${item.slug}`}
+          class="block p-4 border border-slate-700 rounded-lg hover:border-slate-600 hover:bg-slate-900/50 transition-all"
+        >
+          <h4 class="font-medium text-sky-400 mb-2">{item.name}</h4>
+          <div class="text-sm text-slate-400 space-y-1">
+            <p>Ver análisis detallado</p>
+            <p class="text-xs">Incluye simulador de precios</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
