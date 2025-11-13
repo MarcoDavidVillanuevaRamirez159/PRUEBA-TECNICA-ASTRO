@@ -67,7 +67,7 @@ const CompareChart: React.FC<CompareChartProps> = ({ items }) => {
             fontSize={12}
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} />
           <Legend />
           <Bar
             dataKey="ingresos"

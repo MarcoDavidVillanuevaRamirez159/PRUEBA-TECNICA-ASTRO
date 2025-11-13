@@ -25,16 +25,16 @@ const ProductRevenueChart: React.FC<ProductRevenueChartProps> = ({ data }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-slate-900/95 dark:bg-slate-900/95 light:bg-white/95 border border-slate-600 dark:border-slate-600 light:border-slate-300 rounded-lg p-4 shadow-xl backdrop-blur-sm">
-          <p className="text-slate-100 dark:text-slate-100 light:text-slate-900 font-semibold mb-2">{data.fullName}</p>
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-xl">
+          <p className="text-slate-100 font-semibold mb-2">{data.fullName}</p>
           <div className="space-y-1">
-            <p className="text-emerald-400 dark:text-emerald-400 light:text-emerald-600 text-sm font-medium">
+            <p className="text-emerald-400 text-sm font-medium">
               Ingresos: ${data.ingresos.toLocaleString()}
             </p>
-            <p className="text-slate-300 dark:text-slate-300 light:text-slate-700 text-sm">
+            <p className="text-slate-300 text-sm">
               Ventas: {data.ventas} unidades
             </p>
-            <p className="text-amber-400 dark:text-amber-400 light:text-amber-600 text-sm font-medium">
+            <p className="text-amber-400 text-sm font-medium">
               Margen: {data.margen}%
             </p>
           </div>
@@ -69,8 +69,8 @@ const ProductRevenueChart: React.FC<ProductRevenueChartProps> = ({ data }) => {
             fontSize={12}
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Bar 
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} />
+          <Bar
             dataKey="ingresos" 
             fill="#10b981"
             radius={[4, 4, 0, 0]}
