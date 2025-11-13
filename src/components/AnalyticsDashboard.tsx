@@ -1,40 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAnalytics } from '../lib/analytics';
 
 const AnalyticsDashboard: React.FC = () => {
   const { getEvents } = useAnalytics();
   const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Datos de demostración siempre disponibles
+  const getDemoData = () => [
+    { event: 'page_view', category: 'navigation', action: 'view_page', label: 'index', timestamp: Date.now() - 300000 },
+    { event: 'product_view', category: 'product', action: 'view_product', label: 'coca-cola-600ml', timestamp: Date.now() - 240000 },
+    { event: 'product_compare', category: 'product', action: 'compare_products', label: '2 items', timestamp: Date.now() - 180000 },
+    { event: 'store_view', category: 'store', action: 'view_stores', timestamp: Date.now() - 120000 },
+    { event: 'filter_change', category: 'ui', action: 'change_filter', label: 'category', timestamp: Date.now() - 60000 },
+    { event: 'product_view', category: 'product', action: 'view_product', label: 'pan-blanco', timestamp: Date.now() - 50000 },
+    { event: 'page_view', category: 'navigation', action: 'view_page', label: 'stores', timestamp: Date.now() - 40000 }
+  ];
 
   useEffect(() => {
-    // Actualizar datos cada 2 segundos
-    const interval = setInterval(() => {
-      setEvents(getEvents());
-    }, 2000);
-
     // Cargar datos iniciales
-    setEvents(getEvents());
+    setTimeout(() => {
+      const realEvents = getEvents();
+      const displayEvents = realEvents.length > 0 ? realEvents : getDemoData();
+      setEvents(displayEvents);
+      setIsLoading(false);
+    }, 500);
+
+    // Actualizar datos cada 5 segundos
+    const interval = setInterval(() => {
+      const currentEvents = getEvents();
+      setEvents(currentEvents.length > 0 ? currentEvents : getDemoData());
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [getEvents]);
 
   // Procesar datos para gráficas
-  const eventsByCategory = events.reduce((acc: Record<string, number>, event) => {
-    acc[event.category] = (acc[event.category] || 0) + 1;
-    return acc;
-  }, {});
-
-  const pieData = Object.entries(eventsByCategory).map(([name, value]) => ({
-    name: name.charAt(0).toUpperCase() + name.slice(1),
-    value,
-    color: {
-      navigation: '#3b82f6',
-      product: '#10b981',
-      simulation: '#f59e0b',
-      ui: '#8b5cf6',
-      store: '#06b6d4'
-    }[name] || '#6b7280'
-  }));
 
   const eventsByAction = events.reduce((acc: Record<string, number>, event) => {
     acc[event.action] = (acc[event.action] || 0) + 1;
@@ -64,8 +66,32 @@ const AnalyticsDashboard: React.FC = () => {
     .slice(0, 5)
     .map(([name, views]) => ({ name, views }));
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-slate-400">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-slate-800 rounded w-48"></div>
+            <div className="h-4 bg-slate-800 rounded w-32"></div>
+          </div>
+          <p className="mt-4 text-sm">Cargando dashboard de analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isDemo = getEvents().length === 0;
+
   return (
     <div className="space-y-8">
+      {isDemo && (
+        <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4">
+          <p className="text-blue-200 text-sm">
+             <strong>Modo demostración:</strong> Estos son datos de ejemplo. Navega por la aplicación para generar eventos reales.
+          </p>
+        </div>
+      )}
+
       {/* Stats generales */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
@@ -97,61 +123,51 @@ const AnalyticsDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Gráficas */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Distribución por categoría */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
-          <h3 className="text-lg font-semibold mb-4">Eventos por Categoría</h3>
-          {pieData.length > 0 ? (
-            <div style={{ width: '100%', height: '250px' }}>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p className="text-slate-400 text-center py-8">No hay datos aún. Interactúa con la aplicación.</p>
-          )}
-        </div>
-
-        {/* Acciones más frecuentes */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
-          <h3 className="text-lg font-semibold mb-4">Acciones Más Frecuentes</h3>
-          {barData.length > 0 ? (
-            <div style={{ width: '100%', height: '250px' }}>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} angle={-45} textAnchor="end" height={60} />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #475569',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p className="text-slate-400 text-center py-8">No hay datos aún.</p>
-          )}
-        </div>
+      {/* Gráfica de acciones */}
+      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+        <h3 className="text-lg font-semibold mb-4">Acciones Más Frecuentes</h3>
+        {barData.length > 0 ? (
+          <div className="w-full h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  fontSize={11}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl">
+                          <p className="text-slate-100 font-medium">{label}</p>
+                          <p className="text-emerald-400 text-sm">{payload[0].value} veces</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="#10b981"
+                  radius={[4, 4, 0, 0]}
+                  stroke="#059669"
+                  strokeWidth={1}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="text-slate-400 text-center py-8">No hay datos aún.</p>
+        )}
       </div>
 
       {/* Dos columnas: Eventos recientes y Productos top */}
@@ -203,11 +219,11 @@ const AnalyticsDashboard: React.FC = () => {
       </div>
 
       {/* Nota técnica */}
-      <div className="rounded-xl border border-purple-500/30 dark:border-purple-500/30 light:border-purple-300/50 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 dark:from-purple-900/20 dark:to-indigo-900/20 light:from-purple-50/80 light:to-indigo-50/80 p-8">
-        <h3 className="text-xl font-bold text-purple-400 dark:text-purple-400 light:text-purple-700 mb-4">Implementación Técnica</h3>
-        <div className="text-sm text-slate-300 dark:text-slate-300 light:text-slate-700 space-y-3 leading-relaxed">
+      <div className="rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 p-8">
+        <h3 className="text-xl font-bold text-purple-400 mb-4">Implementación Técnica</h3>
+        <div className="text-sm text-slate-300 space-y-3 leading-relaxed">
           <p><strong>Tracking en tiempo real:</strong> Eventos capturados con singleton pattern y localStorage</p>
-          <p><strong>Auto-refresh:</strong> Dashboard se actualiza cada 2 segundos automáticamente</p>
+          <p><strong>Auto-refresh:</strong> Dashboard se actualiza cada 5 segundos automáticamente</p>
           <p><strong>Optimización:</strong> Solo mantiene los últimos 50 eventos para rendimiento</p>
           <p><strong>Escalabilidad:</strong> Fácil integración con Google Analytics, Mixpanel, etc.</p>
           <p><strong>Privacy-first:</strong> Datos solo en localStorage, no se envían a terceros</p>

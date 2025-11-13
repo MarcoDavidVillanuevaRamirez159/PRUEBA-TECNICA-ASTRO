@@ -17,8 +17,7 @@ class Analytics {
 
     this.events.push(analyticsEvent);
 
-    // En producción aquí se enviaría a Google Analytics, Mixpanel, etc.
-    console.log('📊 Analytics Event:', analyticsEvent);
+
 
     // Simular llamada a API de analytics
     if (typeof window !== 'undefined') {
