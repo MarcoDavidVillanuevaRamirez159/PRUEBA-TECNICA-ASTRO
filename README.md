@@ -31,7 +31,7 @@ Una aplicación web moderna para el análisis de datos de ventas, construida con
 
 1. **Clona el repositorio**
    ```bash
-   git clone [URL_DEL_REPOSITORIO]
+   git clone https://github.com/MarcoDavidVillanuevaRamirez159/PRUEBA-TECNICA-ASTRO.git
    cd prueba-tecnica-astro
    ```
 
