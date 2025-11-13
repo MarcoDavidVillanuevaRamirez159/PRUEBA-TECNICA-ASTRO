@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAnalytics } from '../lib/analytics';
 
 const AnalyticsDashboard: React.FC = () => {
+  const { getEvents } = useAnalytics();
   const [events, setEvents] = useState<any[]>([]);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     // Actualizar datos cada 2 segundos
     const interval = setInterval(() => {
       setEvents(getEvents());
-      setRefreshKey(prev => prev + 1);
     }, 2000);
 
     // Cargar datos iniciales

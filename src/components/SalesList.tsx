@@ -49,8 +49,7 @@ const SalesList: React.FC<SalesListProps> = ({ items }) => {
 
     const handleCompare = () => {
         if (selectedItems.length >= 2) {
-            const compareUrl = `/compare?items=${selectedItems.join(',')}`;
-            window.location.href = compareUrl;
+            window.location.href = `/compare?items=${selectedItems.join(',')}`;
         }
     };
 
